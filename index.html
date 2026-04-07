@@ -1,275 +1,721 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Earning App - User Panel</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            background: linear-gradient(135deg, #1e3a8a, #9333ea);
-            min-height: 100vh;
-            color: white;
-            font-family: 'Inter', sans-serif;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SyncTask Pro - Admin Command Center</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Space Grotesk', 'sans-serif'] },
+          colors: {
+            brand: '#00F0FF',
+            brandDark: '#00B4D8',
+            surface: '#111827',
+          }
         }
-        .glass {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 1rem;
-        }
-        .hide { display: none; }
-    </style>
+      }
+    }
+  </script>
+
+  <style>
+    body { background-color: #030712; color: #F3F4F6; overflow-x: hidden; }
+    
+    .glass-panel {
+      background: rgba(17, 24, 39, 0.6);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    
+    .glass-input {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+      transition: all 0.3s ease;
+    }
+    .glass-input:focus { border-color: #00F0FF; outline: none; box-shadow: 0 0 15px rgba(0,240,255,0.15); }
+
+    .btn-glow { background: linear-gradient(135deg, #00F0FF 0%, #0077FF 100%); color: #030712; font-weight: bold; transition: all 0.3s; }
+    .btn-glow:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -10px rgba(0, 240, 255, 0.7); }
+    
+    .btn-danger { background: linear-gradient(135deg, #FF0055 0%, #FF0000 100%); color: white; font-weight: bold; transition: all 0.3s; }
+    .btn-danger:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -10px rgba(255, 0, 85, 0.7); }
+
+    .page-section { display: none; animation: fadeIn 0.4s ease-out; }
+    .page-section.active { display: block; }
+    
+    .sidebar-link.active { background: rgba(0, 240, 255, 0.1); border-right: 3px solid #00F0FF; color: #00F0FF; }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(0,240,255,0.5); }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
 </head>
-<body class="flex justify-center items-center p-4">
+<body class="h-screen flex overflow-hidden">
 
-    <div class="w-full max-w-md w-full relative">
+  <div class="fixed top-[-20%] left-[-10%] w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none z-[-1]"></div>
+  <div class="fixed bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[120px] pointer-events-none z-[-1]"></div>
 
-        <div id="auth-section" class="glass p-6 w-full shadow-2xl">
-            <h2 class="text-3xl font-bold mb-6 text-center">Welcome</h2>
-            <input type="email" id="email" placeholder="Email" class="w-full mb-4 p-3 rounded-lg bg-white/20 text-white placeholder-gray-300 outline-none border border-white/10">
-            <input type="password" id="password" placeholder="Password" class="w-full mb-4 p-3 rounded-lg bg-white/20 text-white placeholder-gray-300 outline-none border border-white/10">
-            <button id="login-btn" class="w-full bg-blue-600 hover:bg-blue-700 p-3 rounded-lg font-bold transition">Login</button>
-            <button id="signup-btn" class="w-full bg-purple-600 hover:bg-purple-700 p-3 rounded-lg font-bold mt-3 transition">Sign Up</button>
-            <p id="auth-error" class="text-red-400 text-sm mt-3 text-center"></p>
-        </div>
+  <div id="loader" class="hidden fixed inset-0 bg-[#030712]/90 backdrop-blur-md flex items-center justify-center z-[200]">
+    <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-brand shadow-[0_0_15px_#00F0FF]"></div>
+  </div>
 
-        <div id="app-section" class="hide w-full space-y-4">
-            
-            <div class="glass p-5 flex flex-col items-center shadow-lg relative">
-                <button id="logout-btn" class="absolute top-4 right-4 text-sm bg-red-500/80 px-3 py-1 rounded">Logout</button>
-                <p class="text-gray-300 text-sm">Total Balance</p>
-                <h1 class="text-4xl font-bold mt-1 mb-2">৳ <span id="balance">0</span></h1>
-                <div class="flex gap-4 text-sm w-full mt-4 bg-white/5 p-3 rounded-lg">
-                    <div class="flex-1 text-center">
-                        <p class="text-gray-400">Level</p>
-                        <p class="font-bold text-yellow-400" id="user-level">Bronze</p>
-                    </div>
-                    <div class="flex-1 text-center border-l border-white/20">
-                        <p class="text-gray-400">Total Earned</p>
-                        <p class="font-bold">৳ <span id="total-earned">0</span></p>
-                    </div>
-                </div>
-            </div>
+  <div id="toast" class="fixed top-5 right-5 transform translate-x-[150%] transition-transform duration-300 z-[300] glass-panel px-6 py-4 rounded-xl border-l-4 border-l-brand flex items-center gap-3">
+    <i data-lucide="info" id="toast-icon" class="text-brand"></i>
+    <span id="toast-msg" class="font-medium text-sm"></span>
+  </div>
 
-            <div class="glass p-5 shadow-lg">
-                <h3 class="font-bold text-lg mb-3 border-b border-white/20 pb-2">Earn Money</h3>
-                
-                <div class="space-y-3">
-                    <button id="task-video" class="w-full bg-white/10 hover:bg-white/20 p-3 rounded flex justify-between items-center transition border border-white/10">
-                        <span>📺 Watch Video Ad</span>
-                        <span class="text-green-400 font-bold">+5 ৳</span>
-                    </button>
-                    <button id="task-timer" class="w-full bg-white/10 hover:bg-white/20 p-3 rounded flex justify-between items-center transition border border-white/10">
-                        <span>⏳ Timer Task (30s)</span>
-                        <span class="text-green-400 font-bold">+10 ৳</span>
-                    </button>
-                    <button id="task-social" class="w-full bg-white/10 hover:bg-white/20 p-3 rounded flex justify-between items-center transition border border-white/10">
-                        <span>👥 Join Telegram</span>
-                        <span class="text-green-400 font-bold">+20 ৳</span>
-                    </button>
-                </div>
-                <div id="task-status" class="mt-3 text-center text-sm text-yellow-300"></div>
-            </div>
-
-            <div class="glass p-5 shadow-lg">
-                <h3 class="font-bold text-lg mb-3 border-b border-white/20 pb-2">Withdraw</h3>
-                <select id="withdraw-method" class="w-full mb-3 p-3 rounded-lg bg-gray-800 text-white outline-none border border-white/10">
-                    <option value="bkash">bKash</option>
-                    <option value="nagad">Nagad</option>
-                    <option value="rocket">Rocket</option>
-                </select>
-                <input type="number" id="withdraw-amount" placeholder="Amount (Min 100)" class="w-full mb-3 p-3 rounded-lg bg-white/20 text-white placeholder-gray-300 outline-none">
-                <input type="text" id="withdraw-account" placeholder="Account Number" class="w-full mb-3 p-3 rounded-lg bg-white/20 text-white placeholder-gray-300 outline-none">
-                <button id="withdraw-btn" class="w-full bg-green-600 hover:bg-green-700 p-3 rounded-lg font-bold transition">Submit Request</button>
-                <p id="withdraw-msg" class="text-sm mt-3 text-center"></p>
-            </div>
-
-            <div class="glass p-5 shadow-lg mb-8">
-                <h3 class="font-bold text-lg mb-3 border-b border-white/20 pb-2">Referral System</h3>
-                <p class="text-sm text-gray-300 mb-2">Your Code:</p>
-                <div class="bg-black/30 p-3 rounded text-center font-mono text-xl tracking-widest mb-3" id="ref-code">...</div>
-                <p class="text-sm text-center">Total Referrals: <span id="ref-count" class="font-bold">0</span></p>
-            </div>
-
-        </div>
+  <div id="login-section" class="w-full h-full flex flex-col items-center justify-center page-section active relative z-10 px-4">
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-black tracking-tight text-white">Admin <span class="text-brand">Command</span></h1>
+      <p class="text-gray-400 mt-2">SyncTask Pro Control Center</p>
     </div>
+    <div class="glass-panel p-8 rounded-2xl w-full max-w-md">
+      <input id="admin-email" type="email" placeholder="Master Admin Email" class="w-full p-4 rounded-xl glass-input mb-4">
+      <input id="admin-password" type="password" placeholder="Master Password" class="w-full p-4 rounded-xl glass-input mb-6">
+      <button id="login-btn" class="w-full p-4 rounded-xl btn-glow flex justify-center items-center gap-2">
+        <i data-lucide="shield-check"></i> Authenticate
+      </button>
+    </div>
+  </div>
 
-    <script type="module">
-        import { auth, db } from './firebase.js';
-        import { signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { doc, getDoc, setDoc, updateDoc, increment, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  <div id="dashboard-section" class="w-full h-full flex page-section">
+    
+    <aside class="w-64 glass-panel border-r border-white/5 flex flex-col z-20">
+      <div class="p-6 border-b border-white/5 text-center">
+        <h2 class="text-2xl font-black tracking-widest"><span class="text-brand">SYNC</span>PRO</h2>
+        <span class="text-[10px] uppercase tracking-widest text-gray-500 font-bold bg-white/5 px-2 py-1 rounded mt-2 inline-block">Root Access</span>
+      </div>
+      <nav class="flex-1 py-6 space-y-2">
+        <a href="#" class="sidebar-link active flex items-center gap-3 px-6 py-3 text-sm font-medium text-gray-400 hover:text-white transition" data-target="view-dashboard">
+          <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Overview
+        </a>
+        <a href="#" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-gray-400 hover:text-white transition" data-target="view-users">
+          <i data-lucide="users" class="w-5 h-5"></i> User Control
+        </a>
+        <a href="#" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-gray-400 hover:text-white transition" data-target="view-withdrawals">
+          <i data-lucide="arrow-left-right" class="w-5 h-5"></i> Withdrawals
+        </a>
+        <a href="#" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-gray-400 hover:text-white transition" data-target="view-system">
+          <i data-lucide="settings-2" class="w-5 h-5"></i> System & Tasks
+        </a>
+        <a href="#" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-gray-400 hover:text-white transition" data-target="view-marketing">
+          <i data-lucide="megaphone" class="w-5 h-5"></i> Marketing
+        </a>
+      </nav>
+      <div class="p-6 border-t border-white/5">
+        <button id="logout-btn" class="w-full py-2 rounded-lg btn-danger text-sm flex justify-center items-center gap-2">
+          <i data-lucide="power" class="w-4 h-4"></i> Disconnect
+        </button>
+      </div>
+    </aside>
 
-        // DOM Elements
-        const authSec = document.getElementById('auth-section');
-        const appSec = document.getElementById('app-section');
-        let currentUserDoc = null;
-        let isTaskActive = false;
+    <main class="flex-1 h-full overflow-y-auto relative p-8">
+      
+      <div id="view-dashboard" class="admin-view block">
+        <div class="flex justify-between items-center mb-8">
+          <div>
+            <h2 class="text-3xl font-black text-white">System <span class="text-brand">Overview</span></h2>
+            <p class="text-gray-400 text-sm mt-1">Real-time metrics and liabilities</p>
+          </div>
+          <button class="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-sm transition flex items-center gap-2" onclick="loadDashboardData()"><i data-lucide="refresh-cw" class="w-4 h-4"></i> Sync</button>
+        </div>
 
-        // --- AUTHENTICATION ---
-        const generateDeviceId = () => {
-            let id = localStorage.getItem('device_id');
-            if(!id) { id = 'DEV-' + Math.random().toString(36).substr(2, 9); localStorage.setItem('device_id', id); }
-            return id;
-        };
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div class="glass-panel p-6 rounded-2xl border-t-2 border-t-blue-500">
+            <p class="text-xs text-gray-400 uppercase font-bold tracking-wider mb-1">Total Users</p>
+            <h3 class="text-3xl font-black text-white" id="stat-users">0</h3>
+          </div>
+          <div class="glass-panel p-6 rounded-2xl border-t-2 border-t-brand">
+            <p class="text-xs text-gray-400 uppercase font-bold tracking-wider mb-1">System Coins (Liability)</p>
+            <h3 class="text-3xl font-black text-brand flex items-center gap-1"><i data-lucide="coins" class="w-6 h-6"></i> <span id="stat-coins">0</span></h3>
+          </div>
+          <div class="glass-panel p-6 rounded-2xl border-t-2 border-t-green-500">
+            <p class="text-xs text-gray-400 uppercase font-bold tracking-wider mb-1">Est. BDT Value</p>
+            <h3 class="text-3xl font-black text-green-400">৳<span id="stat-bdt">0</span></h3>
+            <p class="text-[10px] text-gray-500 mt-1">Based on current conversion rate</p>
+          </div>
+          <div class="glass-panel p-6 rounded-2xl border-t-2 border-t-yellow-500 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-16 h-16 bg-yellow-500/10 rounded-bl-full"></div>
+            <p class="text-xs text-gray-400 uppercase font-bold tracking-wider mb-1">Pending Withdrawals</p>
+            <h3 class="text-3xl font-black text-yellow-400" id="stat-pending-withdraws">0</h3>
+          </div>
+        </div>
+      </div>
 
-        document.getElementById('signup-btn').addEventListener('click', async () => {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const refCode = Math.random().toString(36).substr(2, 6).toUpperCase();
-                
-                await setDoc(doc(db, "users", userCredential.user.uid), {
-                    email: email,
-                    balance: 0,
-                    totalEarned: 0,
-                    level: "Bronze",
-                    refCode: refCode,
-                    refCount: 0,
-                    deviceId: generateDeviceId(),
-                    status: 'active'
-                });
-            } catch (error) {
-                document.getElementById('auth-error').innerText = error.message;
-            }
-        });
+      <div id="view-users" class="admin-view hidden">
+        <h2 class="text-2xl font-bold mb-6">User <span class="text-brand">Control</span></h2>
+        
+        <div class="glass-panel p-4 rounded-xl mb-6 flex gap-4">
+          <input type="text" id="search-user" placeholder="Search by Email or UID..." class="flex-1 p-3 rounded-lg glass-input">
+          <button class="btn-glow px-6 rounded-lg" onclick="searchUsers()">Search</button>
+        </div>
 
-        document.getElementById('login-btn').addEventListener('click', async () => {
-            try {
-                await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value);
-            } catch (error) {
-                document.getElementById('auth-error').innerText = error.message;
-            }
-        });
+        <div class="glass-panel rounded-xl overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+              <thead class="bg-white/5 border-b border-white/10 uppercase text-xs text-gray-400">
+                <tr>
+                  <th class="px-6 py-4 font-bold">User Info</th>
+                  <th class="px-6 py-4 font-bold">Balance (Coins)</th>
+                  <th class="px-6 py-4 font-bold">Device ID / Status</th>
+                  <th class="px-6 py-4 font-bold text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="users-table-body" class="divide-y divide-white/5">
+                </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
-        document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+      <div id="view-withdrawals" class="admin-view hidden">
+        <h2 class="text-2xl font-bold mb-6">Withdrawal <span class="text-brand">Queue</span></h2>
+        <div class="glass-panel rounded-xl overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+              <thead class="bg-white/5 border-b border-white/10 uppercase text-xs text-gray-400">
+                <tr>
+                  <th class="px-6 py-4">User</th>
+                  <th class="px-6 py-4">Amount</th>
+                  <th class="px-6 py-4">Method & Info</th>
+                  <th class="px-6 py-4">Date</th>
+                  <th class="px-6 py-4 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="withdrawals-table-body" class="divide-y divide-white/5">
+                </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
-        // --- DATA SYNC & UI ---
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                authSec.classList.add('hide');
-                appSec.classList.remove('hide');
-                
-                // Realtime listen to user data
-                onSnapshot(doc(db, "users", user.uid), (docSnap) => {
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        if(data.status === 'blocked') {
-                            alert("Your account is blocked.");
-                            signOut(auth);
-                            return;
-                        }
-                        currentUserDoc = docSnap.ref;
-                        document.getElementById('balance').innerText = data.balance;
-                        document.getElementById('total-earned').innerText = data.totalEarned;
-                        document.getElementById('user-level').innerText = data.level;
-                        document.getElementById('ref-code').innerText = data.refCode;
-                        document.getElementById('ref-count').innerText = data.refCount;
-                    }
-                });
-            } else {
-                authSec.classList.remove('hide');
-                appSec.classList.add('hide');
-                currentUserDoc = null;
-            }
-        });
+      <div id="view-system" class="admin-view hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          
+          <div>
+            <h2 class="text-2xl font-bold mb-6 text-brand flex items-center gap-2"><i data-lucide="cpu"></i> Smart Economy</h2>
+            <div class="glass-panel p-6 rounded-2xl space-y-6">
+              <div class="bg-blue-500/10 border border-blue-500/20 p-4 rounded-xl text-sm text-blue-200 mb-4">
+                <strong>Crucial:</strong> Users earn "Coins" on the frontend. Define how many coins equal 1 BDT.
+              </div>
+              
+              <div>
+                <label class="text-xs text-gray-400 font-bold uppercase tracking-wide">Coin Conversion Rate</label>
+                <div class="flex items-center gap-3 mt-2">
+                  <input type="number" id="config-coin-rate" class="w-full p-3 rounded-lg glass-input font-bold" placeholder="e.g., 100">
+                  <span class="text-sm text-gray-400 whitespace-nowrap">Coins = 1 BDT (৳)</span>
+                </div>
+              </div>
+              
+              <div>
+                <label class="text-xs text-gray-400 font-bold uppercase tracking-wide">Base Referral Reward (Coins)</label>
+                <input type="number" id="config-ref-reward" class="w-full p-3 rounded-lg glass-input mt-2 font-bold" placeholder="e.g., 500">
+              </div>
 
-        // --- TASKS SYSTEM ---
-        const awardPoints = async (amount, taskName) => {
-            if(!currentUserDoc) return;
-            await updateDoc(currentUserDoc, {
-                balance: increment(amount),
-                totalEarned: increment(amount)
-            });
-            document.getElementById('task-status').innerText = `✅ Earned ৳${amount} from ${taskName}!`;
-            setTimeout(() => document.getElementById('task-status').innerText = "", 3000);
-        };
+              <div>
+                <label class="text-xs text-gray-400 font-bold uppercase tracking-wide">Daily Ad Limit Per User</label>
+                <input type="number" id="config-ad-limit" class="w-full p-3 rounded-lg glass-input mt-2 font-bold" placeholder="e.g., 15">
+              </div>
 
-        // 1. Video Task (Simulated)
-        document.getElementById('task-video').addEventListener('click', () => {
-            document.getElementById('task-status').innerText = "Watching video... please wait 5s";
-            setTimeout(() => awardPoints(5, 'Video Ad'), 5000);
-        });
+              <button class="w-full btn-glow p-3 rounded-xl" onclick="saveEconomySettings()">Save System Economy</button>
+            </div>
+          </div>
 
-        // 2. Timer Task with Anti-Tab Switch
-        document.getElementById('task-timer').addEventListener('click', () => {
-            if(isTaskActive) return;
-            isTaskActive = true;
-            let timeLeft = 30;
-            const statusEl = document.getElementById('task-status');
+          <div>
+            <h2 class="text-2xl font-bold mb-6 flex items-center gap-2"><i data-lucide="list-todo"></i> Dynamic Tasks</h2>
+            <div class="glass-panel p-6 rounded-2xl">
+              <div id="tasks-list" class="space-y-3 mb-6 max-h-[300px] overflow-y-auto pr-2">
+                </div>
+              
+              <div class="border-t border-white/10 pt-6">
+                <h4 class="text-sm font-bold text-brand mb-4">Add New Task</h4>
+                <div class="space-y-3">
+                  <input type="text" id="new-task-title" placeholder="Task Title (e.g., Visit Website)" class="w-full p-3 rounded-lg glass-input text-sm">
+                  <div class="flex gap-3">
+                    <input type="number" id="new-task-reward" placeholder="Reward (Coins)" class="w-1/2 p-3 rounded-lg glass-input text-sm">
+                    <input type="number" id="new-task-timer" placeholder="Timer (Sec)" class="w-1/2 p-3 rounded-lg glass-input text-sm">
+                  </div>
+                  <input type="text" id="new-task-url" placeholder="Target URL (Optional)" class="w-full p-3 rounded-lg glass-input text-sm">
+                  <button class="w-full bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold p-3 rounded-xl transition" onclick="createNewTask()">Deploy Task</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div id="view-marketing" class="admin-view hidden">
+        <h2 class="text-2xl font-bold mb-6 text-purple-400 flex items-center gap-2"><i data-lucide="rocket"></i> Growth & Marketing</h2>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div class="glass-panel p-6 rounded-2xl relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-transparent"></div>
+            <h3 class="text-lg font-bold mb-2 relative z-10">Global Earnings Boost</h3>
+            <p class="text-xs text-gray-400 mb-6 relative z-10">Temporarily multiply all task earnings to drive engagement.</p>
             
-            const timer = setInterval(() => {
-                timeLeft--;
-                statusEl.innerText = `⏳ Stay on page: ${timeLeft}s`;
-                if(timeLeft <= 0) {
-                    clearInterval(timer);
-                    isTaskActive = false;
-                    document.removeEventListener("visibilitychange", handleVisibilityChange);
-                    awardPoints(10, 'Timer Task');
-                }
-            }, 1000);
+            <div class="flex items-center justify-between bg-black/30 p-4 rounded-xl border border-white/5 relative z-10 mb-4">
+              <span class="font-bold">Boost Mode Status</span>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="boost-toggle" class="sr-only peer">
+                <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-500"></div>
+              </label>
+            </div>
+            
+            <input type="number" id="boost-multiplier" placeholder="Multiplier (e.g. 1.5x)" class="w-full p-3 rounded-lg glass-input mb-4 relative z-10" step="0.1">
+            <button class="w-full btn-glow py-3 rounded-xl relative z-10 bg-gradient-to-r from-purple-500 to-indigo-500 text-white" onclick="saveMarketingConfig()">Update Marketing Setup</button>
+          </div>
 
-            const handleVisibilityChange = () => {
-                if (document.hidden) {
-                    clearInterval(timer);
-                    isTaskActive = false;
-                    statusEl.innerText = "❌ Task failed! You switched tabs.";
-                    statusEl.classList.replace('text-yellow-300', 'text-red-400');
-                    document.removeEventListener("visibilitychange", handleVisibilityChange);
-                }
-            };
-            document.addEventListener("visibilitychange", handleVisibilityChange);
+          <div class="glass-panel p-6 rounded-2xl">
+            <h3 class="text-lg font-bold mb-2">System Notice</h3>
+            <p class="text-xs text-gray-400 mb-6">Push an alert directly to the user application.</p>
+            
+            <input type="text" id="notice-title" placeholder="Notice Title" class="w-full p-3 rounded-lg glass-input mb-3">
+            <textarea id="notice-body" placeholder="Message content..." class="w-full p-3 rounded-lg glass-input mb-4 h-24 resize-none"></textarea>
+            
+            <div class="flex gap-4">
+              <button class="flex-1 border border-brand text-brand hover:bg-brand/10 p-3 rounded-xl transition font-bold" onclick="publishNotice('popup')">Send Popup</button>
+              <button class="flex-1 bg-white/10 hover:bg-white/20 p-3 rounded-xl transition font-bold" onclick="publishNotice('banner')">Set Banner</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <div id="user-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+    <div class="glass-panel rounded-2xl p-6 w-full max-w-md relative">
+      <button class="absolute top-4 right-4 text-gray-400 hover:text-white" onclick="closeUserModal()"><i data-lucide="x"></i></button>
+      <h3 class="text-xl font-bold mb-4">User Details</h3>
+      
+      <div id="modal-user-content" class="space-y-4">
+        </div>
+
+      <div class="mt-6 pt-4 border-t border-white/10 space-y-3">
+        <h4 class="text-sm font-bold text-gray-400">Balance Adjust (Coins)</h4>
+        <div class="flex gap-2">
+          <input type="number" id="manual-coin-adjust" placeholder="Amount (Use - to deduct)" class="w-full p-2 rounded glass-input text-sm">
+          <button class="bg-brand text-black font-bold px-4 rounded text-sm hover:scale-105 transition" onclick="adjustUserBalance()">Apply</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    // Firebase Config (Replace with your actual keys)
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, orderBy, increment, deleteDoc, addDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // SECURITY: Define allowed Master Admin Emails
+    const ADMIN_EMAILS = ["admin@synctask.pro", "master@synctask.pro"];
+    
+    let globalConfig = { coinToBdtRate: 100, refReward: 500, dailyAdLimit: 15, boostMode: false, boostMultiplier: 1.0 };
+    let currentSelectedUserId = null;
+
+    // --- Core UI Functions ---
+    window.onload = () => {
+      lucide.createIcons();
+      onAuthStateChanged(auth, handleAuthState);
+      setupNavigation();
+    };
+
+    function showLoader(show) { document.getElementById('loader').classList.toggle('hidden', !show); }
+    function showToast(msg, type="info") {
+      const t = document.getElementById('toast');
+      document.getElementById('toast-msg').textContent = msg;
+      
+      const icon = document.getElementById('toast-icon');
+      icon.className = ''; 
+      if(type === 'success') { t.style.borderColor = '#10B981'; icon.classList.add('text-green-500'); icon.setAttribute('data-lucide', 'check-circle'); }
+      else if(type === 'error') { t.style.borderColor = '#EF4444'; icon.classList.add('text-red-500'); icon.setAttribute('data-lucide', 'alert-circle'); }
+      else { t.style.borderColor = '#00F0FF'; icon.classList.add('text-brand'); icon.setAttribute('data-lucide', 'info'); }
+      
+      lucide.createIcons();
+      t.style.transform = 'translateX(0)';
+      setTimeout(() => t.style.transform = 'translateX(150%)', 3000);
+    }
+
+    function setupNavigation() {
+      document.querySelectorAll('.sidebar-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+          document.querySelectorAll('.admin-view').forEach(v => v.classList.add('hidden'));
+          document.getElementById(link.dataset.target).classList.remove('hidden');
+          
+          // Data Refresh Hooks
+          if(link.dataset.target === 'view-dashboard') loadDashboardData();
+          if(link.dataset.target === 'view-users') loadUsers();
+          if(link.dataset.target === 'view-withdrawals') loadWithdrawals();
+          if(link.dataset.target === 'view-system') loadSystemConfig();
         });
+      });
+    }
 
-        // 3. Social Task
-        document.getElementById('task-social').addEventListener('click', () => {
-            window.open("https://telegram.org", "_blank");
-            setTimeout(() => awardPoints(20, 'Social Join'), 2000);
+    // --- Authentication ---
+    async function handleAuthState(user) {
+      if (user && ADMIN_EMAILS.includes(user.email)) {
+        document.getElementById('login-section').classList.remove('active');
+        document.getElementById('dashboard-section').classList.add('active');
+        await initSystemConfig();
+        loadDashboardData();
+      } else {
+        if(user) await signOut(auth);
+        document.getElementById('login-section').classList.add('active');
+        document.getElementById('dashboard-section').classList.remove('active');
+      }
+    }
+
+    document.getElementById('login-btn').addEventListener('click', async () => {
+      const e = document.getElementById('admin-email').value.trim();
+      const p = document.getElementById('admin-password').value;
+      if(!e || !p) return showToast('Enter credentials', 'error');
+      if(!ADMIN_EMAILS.includes(e)) return showToast('Unauthorized Email', 'error');
+      
+      showLoader(true);
+      try { await signInWithEmailAndPassword(auth, e, p); showToast('Access Granted', 'success'); } 
+      catch (err) { showToast('Invalid Auth', 'error'); }
+      finally { showLoader(false); }
+    });
+
+    document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+
+    // --- Config & Economy (The "Smart System") ---
+    async function initSystemConfig() {
+      const ref = doc(db, "system", "config");
+      const snap = await getDoc(ref);
+      if(snap.exists()) {
+        globalConfig = { ...globalConfig, ...snap.data() };
+      } else {
+        await setDoc(ref, globalConfig); // Initialize defaults
+      }
+    }
+
+    window.loadSystemConfig = async function() {
+      await initSystemConfig();
+      document.getElementById('config-coin-rate').value = globalConfig.coinToBdtRate;
+      document.getElementById('config-ref-reward').value = globalConfig.refReward;
+      document.getElementById('config-ad-limit').value = globalConfig.dailyAdLimit;
+      
+      document.getElementById('boost-toggle').checked = globalConfig.boostMode;
+      document.getElementById('boost-multiplier').value = globalConfig.boostMultiplier;
+      loadTasks();
+    }
+
+    window.saveEconomySettings = async function() {
+      const rate = parseInt(document.getElementById('config-coin-rate').value) || 100;
+      const refRev = parseInt(document.getElementById('config-ref-reward').value) || 500;
+      const adLim = parseInt(document.getElementById('config-ad-limit').value) || 15;
+      
+      showLoader(true);
+      try {
+        await updateDoc(doc(db, "system", "config"), { coinToBdtRate: rate, refReward: refRev, dailyAdLimit: adLim });
+        globalConfig.coinToBdtRate = rate;
+        showToast('Economy updated securely.', 'success');
+        loadDashboardData(); // Update estimated liabilities
+      } catch (e) { showToast('Error saving', 'error'); }
+      showLoader(false);
+    }
+
+    window.saveMarketingConfig = async function() {
+      const bMode = document.getElementById('boost-toggle').checked;
+      const bMult = parseFloat(document.getElementById('boost-multiplier').value) || 1.0;
+      
+      showLoader(true);
+      try {
+        await updateDoc(doc(db, "system", "config"), { boostMode: bMode, boostMultiplier: bMult });
+        showToast('Marketing engine updated.', 'success');
+      } catch (e) { showToast('Error', 'error'); }
+      showLoader(false);
+    }
+
+    // --- Dashboard Analytics ---
+    window.loadDashboardData = async function() {
+      showLoader(true);
+      try {
+        // 1. Users & Total Liability
+        const usersSnap = await getDocs(collection(db, "users"));
+        let totalCoins = 0;
+        document.getElementById('stat-users').textContent = usersSnap.size;
+        
+        usersSnap.forEach(d => { totalCoins += (d.data().coins || 0); });
+        document.getElementById('stat-coins').textContent = totalCoins.toLocaleString();
+        
+        // 2. Calculate BDT based on current admin rate
+        const bdtValue = (totalCoins / globalConfig.coinToBdtRate).toFixed(2);
+        document.getElementById('stat-bdt').textContent = bdtValue;
+
+        // 3. Pending Withdrawals
+        const wQ = query(collection(db, "withdrawals"), where("status", "==", "pending"));
+        const wSnap = await getDocs(wQ);
+        document.getElementById('stat-pending-withdraws').textContent = wSnap.size;
+
+      } catch (e) { console.error(e); showToast('Error fetching stats', 'error'); }
+      showLoader(false);
+    }
+
+    // --- User Control ---
+    window.loadUsers = async function() {
+      showLoader(true);
+      try {
+        const snap = await getDocs(query(collection(db, "users"), orderBy("coins", "desc")));
+        renderUserTable(snap);
+      } catch (e) { console.error(e); }
+      showLoader(false);
+    }
+
+    window.searchUsers = async function() {
+      const qVal = document.getElementById('search-user').value.trim();
+      if(!qVal) return loadUsers();
+      
+      showLoader(true);
+      try {
+        // Simple client-side filter for demonstration (requires compound index for true server-side text search)
+        const snap = await getDocs(collection(db, "users"));
+        const filtered = { docs: snap.docs.filter(d => d.data().email?.includes(qVal) || d.id === qVal) };
+        renderUserTable(filtered);
+      } catch (e) { console.error(e); }
+      showLoader(false);
+    }
+
+    function renderUserTable(snap) {
+      const tbody = document.getElementById('users-table-body');
+      tbody.innerHTML = '';
+      snap.docs.forEach(docSnap => {
+        const u = docSnap.data();
+        const bdt = ( (u.coins || 0) / globalConfig.coinToBdtRate ).toFixed(2);
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-white/5 transition";
+        tr.innerHTML = `
+          <td class="px-6 py-4">
+            <div class="font-bold text-white">${u.name || 'Unknown'}</div>
+            <div class="text-xs text-gray-500">${u.email}</div>
+          </td>
+          <td class="px-6 py-4">
+            <div class="font-bold text-brand">${(u.coins || 0).toLocaleString()} <i data-lucide="coins" class="w-3 h-3 inline"></i></div>
+            <div class="text-xs text-green-400">≈ ৳${bdt}</div>
+          </td>
+          <td class="px-6 py-4">
+            <div class="text-xs font-mono text-gray-400 mb-1">${u.deviceId || 'N/A'}</div>
+            <span class="px-2 py-1 text-[10px] font-bold uppercase rounded ${u.isBlocked ? 'bg-red-500/20 text-red-500' : 'bg-green-500/20 text-green-400'}">${u.isBlocked ? 'Blocked' : 'Active'}</span>
+          </td>
+          <td class="px-6 py-4 text-right">
+            <button class="bg-white/10 hover:bg-white/20 p-2 rounded text-white transition" onclick="openUserModal('${docSnap.id}')"><i data-lucide="settings" class="w-4 h-4"></i></button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      lucide.createIcons();
+    }
+
+    window.openUserModal = async function(uid) {
+      currentSelectedUserId = uid;
+      showLoader(true);
+      try {
+        const snap = await getDoc(doc(db, "users", uid));
+        const u = snap.data();
+        const content = document.getElementById('modal-user-content');
+        
+        content.innerHTML = `
+          <div class="bg-black/30 p-3 rounded border border-white/5 text-sm">
+            <p><span class="text-gray-400">UID:</span> <span class="font-mono text-xs">${uid}</span></p>
+            <p><span class="text-gray-400">Email:</span> ${u.email}</p>
+            <p><span class="text-gray-400">Ref Code:</span> ${u.referralCode || 'N/A'}</p>
+            <p><span class="text-gray-400">Valid Refs:</span> ${u.validReferrals || 0}</p>
+          </div>
+          <button class="w-full py-2 rounded font-bold text-sm ${u.isBlocked ? 'bg-green-500 text-white' : 'btn-danger'}" onclick="toggleUserBlock('${uid}', ${u.isBlocked})">
+            ${u.isBlocked ? 'Unblock Account' : 'Block Account (Ban)'}
+          </button>
+        `;
+        document.getElementById('user-modal').classList.remove('hidden');
+      } catch (e) {}
+      showLoader(false);
+    }
+    
+    window.closeUserModal = () => document.getElementById('user-modal').classList.add('hidden');
+
+    window.toggleUserBlock = async function(uid, currentState) {
+      if(!confirm(`Are you sure you want to ${currentState ? 'unblock' : 'block'} this user?`)) return;
+      await updateDoc(doc(db, "users", uid), { isBlocked: !currentState });
+      showToast('Status updated', 'success');
+      closeUserModal();
+      loadUsers();
+    }
+
+    window.adjustUserBalance = async function() {
+      const amt = parseInt(document.getElementById('manual-coin-adjust').value);
+      if(!amt || isNaN(amt) || !currentSelectedUserId) return;
+      
+      showLoader(true);
+      try {
+        await updateDoc(doc(db, "users", currentSelectedUserId), { coins: increment(amt) });
+        showToast(`Balance adjusted by ${amt} coins`, 'success');
+        document.getElementById('manual-coin-adjust').value = '';
+        closeUserModal();
+        loadUsers();
+      } catch(e) { showToast('Error adjusting', 'error'); }
+      showLoader(false);
+    }
+
+    // --- Withdrawals Control ---
+    window.loadWithdrawals = async function() {
+      showLoader(true);
+      try {
+        const snap = await getDocs(query(collection(db, "withdrawals"), orderBy("requestedAt", "desc")));
+        const tbody = document.getElementById('withdrawals-table-body');
+        tbody.innerHTML = '';
+        
+        snap.docs.forEach(docSnap => {
+          const w = docSnap.data();
+          const tr = document.createElement('tr');
+          tr.className = "hover:bg-white/5 transition";
+          
+          let actionBtns = '';
+          if(w.status === 'pending') {
+            actionBtns = `
+              <button class="bg-green-500/20 text-green-400 hover:bg-green-500 hover:text-white px-3 py-1 rounded text-xs font-bold transition border border-green-500/30" onclick="processWithdraw('${docSnap.id}', 'approved', null, null)">Approve</button>
+              <button class="bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white px-3 py-1 rounded text-xs font-bold transition border border-red-500/30 ml-2" onclick="processWithdraw('${docSnap.id}', 'rejected', '${w.userId}', ${w.amountCoins})">Reject & Refund</button>
+            `;
+          } else {
+             const color = w.status === 'approved' ? 'text-green-400' : 'text-red-400';
+             actionBtns = `<span class="uppercase text-[10px] font-bold ${color}">${w.status}</span>`;
+          }
+
+          tr.innerHTML = `
+            <td class="px-6 py-4 font-mono text-[10px] text-gray-400">${w.userId}</td>
+            <td class="px-6 py-4">
+              <div class="font-bold text-white">৳${w.amountBdt}</div>
+              <div class="text-xs text-brand">${w.amountCoins} Coins</div>
+            </td>
+            <td class="px-6 py-4">
+              <div class="font-bold uppercase">${w.method}</div>
+              <div class="text-xs text-yellow-400 font-mono">${w.paymentDetail}</div>
+            </td>
+            <td class="px-6 py-4 text-xs text-gray-500">${w.requestedAt ? w.requestedAt.toDate().toLocaleDateString() : 'N/A'}</td>
+            <td class="px-6 py-4 text-right">${actionBtns}</td>
+          `;
+          tbody.appendChild(tr);
         });
+      } catch (e) { console.error(e); }
+      showLoader(false);
+    }
 
-        // --- WITHDRAW SYSTEM ---
-        document.getElementById('withdraw-btn').addEventListener('click', async () => {
-            const amount = parseInt(document.getElementById('withdraw-amount').value);
-            const method = document.getElementById('withdraw-method').value;
-            const account = document.getElementById('withdraw-account').value;
-            const msgEl = document.getElementById('withdraw-msg');
+    window.processWithdraw = async function(wid, action, uid, coinRefundAmt) {
+      if(!confirm(`Are you sure you want to ${action.toUpperCase()} this request?`)) return;
+      
+      showLoader(true);
+      try {
+        await updateDoc(doc(db, "withdrawals", wid), { status: action });
+        
+        // Critical: Smart Refund Logic
+        if(action === 'rejected' && uid && coinRefundAmt) {
+           await updateDoc(doc(db, "users", uid), { coins: increment(coinRefundAmt) });
+           showToast(`Rejected and ${coinRefundAmt} coins refunded.`, 'success');
+        } else {
+           showToast(`Request ${action}.`, 'success');
+        }
+        loadWithdrawals();
+      } catch (e) { showToast('Error processing', 'error'); }
+      showLoader(false);
+    }
 
-            if(amount < 100 || !account) {
-                msgEl.innerText = "❌ Min 100 ৳ and account number required.";
-                msgEl.className = "text-sm mt-3 text-center text-red-400";
-                return;
-            }
+    // --- Task Control ---
+    window.loadTasks = async function() {
+      const snap = await getDocs(collection(db, "tasks"));
+      const list = document.getElementById('tasks-list');
+      list.innerHTML = '';
+      
+      snap.forEach(d => {
+        const t = d.data();
+        list.innerHTML += `
+          <div class="bg-white/5 border border-white/10 p-4 rounded-xl flex justify-between items-center group">
+            <div>
+              <h4 class="font-bold text-sm text-white">${t.title}</h4>
+              <p class="text-xs text-gray-400 mt-1">Reward: <span class="text-brand">${t.rewardCoins} Coins</span> • Timer: ${t.timer}s</p>
+            </div>
+            <button class="text-red-500 bg-red-500/10 hover:bg-red-500 hover:text-white p-2 rounded transition opacity-0 group-hover:opacity-100" onclick="deleteTask('${d.id}')"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+          </div>
+        `;
+      });
+      lucide.createIcons();
+    }
 
-            const currentBalance = parseInt(document.getElementById('balance').innerText);
-            if(amount > currentBalance) {
-                msgEl.innerText = "❌ Insufficient balance.";
-                msgEl.className = "text-sm mt-3 text-center text-red-400";
-                return;
-            }
-
-            try {
-                // Deduct balance
-                await updateDoc(currentUserDoc, { balance: increment(-amount) });
-                // Create Request
-                await addDoc(collection(db, "withdrawals"), {
-                    userId: auth.currentUser.uid,
-                    email: auth.currentUser.email,
-                    amount: amount,
-                    method: method,
-                    account: account,
-                    status: 'pending',
-                    timestamp: new Date()
-                });
-                msgEl.innerText = "✅ Withdraw request submitted successfully!";
-                msgEl.className = "text-sm mt-3 text-center text-green-400";
-                document.getElementById('withdraw-amount').value = '';
-                document.getElementById('withdraw-account').value = '';
-            } catch (error) {
-                console.error(error);
-            }
+    window.createNewTask = async function() {
+      const title = document.getElementById('new-task-title').value.trim();
+      const reward = parseInt(document.getElementById('new-task-reward').value);
+      const timer = parseInt(document.getElementById('new-task-timer').value);
+      const url = document.getElementById('new-task-url').value.trim();
+      
+      if(!title || !reward || !timer) return showToast('Fill all task fields', 'error');
+      
+      showLoader(true);
+      try {
+        await addDoc(collection(db, "tasks"), {
+          title, rewardCoins: reward, timer, targetUrl: url, isActive: true, createdAt: new Date()
         });
-    </script>
+        showToast('Task Deployed', 'success');
+        document.getElementById('new-task-title').value = '';
+        document.getElementById('new-task-reward').value = '';
+        document.getElementById('new-task-timer').value = '';
+        document.getElementById('new-task-url').value = '';
+        loadTasks();
+      } catch (e) { showToast('Error creating task', 'error'); }
+      showLoader(false);
+    }
+
+    window.deleteTask = async function(tid) {
+      if(!confirm("Remove this task permanently?")) return;
+      await deleteDoc(doc(db, "tasks", tid));
+      loadTasks();
+      showToast('Task removed', 'info');
+    }
+
+    // --- Notices & Marketing ---
+    window.publishNotice = async function(type) {
+      const title = document.getElementById('notice-title').value.trim();
+      const body = document.getElementById('notice-body').value.trim();
+      if(!title || !body) return showToast('Fill notice details', 'error');
+      
+      showLoader(true);
+      try {
+        await updateDoc(doc(db, "system", "config"), { 
+          activeNotice: { title, body, type, timestamp: new Date().toISOString() } 
+        });
+        showToast(`Notice pushed as ${type}`, 'success');
+        document.getElementById('notice-title').value = '';
+        document.getElementById('notice-body').value = '';
+      } catch (e) { showToast('Error pushing notice', 'error'); }
+      showLoader(false);
+    }
+
+  </script>
 </body>
 </html>
